@@ -6,7 +6,8 @@
 library(tidyverse)
               
 setwd("~/Documents/GitHub/ADJHomework/Data")
-
+#setting the directory to my own. If you want to follow along, just change the directory to where the dispatch.csv
+#file is located and the rest should fall into place
 Dis <- read_csv("dispatch.csv")
 # Question 1: What's the timeframe that this dataset covers?  
 
