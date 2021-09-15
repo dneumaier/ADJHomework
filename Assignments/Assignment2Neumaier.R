@@ -16,6 +16,9 @@ Dis <- read_csv("dispatch.csv")
 Dis %>% select(CallDateTime) %>% arrange(desc(CallDateTime)) #view the end point
 Dis %>% select(CallDateTime) %>% arrange(CallDateTime) #view start point
 
+#shortcut not used:
+Dis %>% summarize(timeFrame = range(CallDateTime))
+
 # The answer
 
 #From 8/23/2021 until 8/29/2021 It is hard to say the start time because AM/PM
@@ -53,7 +56,8 @@ Dis %>% group_by(Hour) %>% summarize(count = n()) %>% arrange(desc(count))
 # Question 4:  Which police district had the most traffic stops?
 
 # Your code: 
-Dis %>% filter(ExtNatureDisplayName == "TRAFFIC STOP") %>% group_by(PolArea) %>% summarize(count = n()) %>% arrange(desc(count))
+Dis %>% filter(ExtNatureDisplayName == "TRAFFIC STOP") %>% group_by(PolArea) %>%
+  summarize(count = n()) %>% arrange(desc(count))
 #filtering the data for Traffic stops, grouping the data by the policing 
 #area/disctrict (PolArea) then counting the number of times each one shows up 
 #then arranging it by highest to lowest number of occurrences
@@ -70,7 +74,10 @@ Dis %>% filter(ExtNatureDisplayName == "TRAFFIC STOP") %>% group_by(PolArea) %>%
 
 # Your code: 
 
-Dis %>% filter(Address == "11300 S AIRPORT DR") %>% group_by(ExtNatureDisplayName) %>% summarize(count = n()) %>% arrange(desc(count))
+Dis %>% filter(Address == "11300 S AIRPORT DR") %>%
+  group_by(ExtNatureDisplayName) %>%
+  summarize(count = n()) %>%
+  arrange(desc(count))
 #Filtering for the airport address, grouping by reason name, counting the 
 #occurrences of each sorting high to low by count
 
