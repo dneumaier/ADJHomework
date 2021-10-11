@@ -83,6 +83,13 @@ combined %>% filter(!is.na(covid_19_deaths)) %>% filter(!is.na(pop2019)) %>% fil
   summarize(DRs = (sum(covid_19_deaths)/sum(pop2019)*100000), deaths = sum(covid_19_deaths)) %>% arrange(desc(DRs))
 
 
+##Specifically within the District of Columbia area, the Death rates of Hispanics and Non-Hispanic Blacks are signifanctly higher than the nationwide averages.
+#Hispanics, though their population in D.C. is not too high, are dying at a rate of 458 per 100,000 people with a total of 201 deaths.
+#That total death count is comparable to Non-Hispanic white deaths at 204.
+##Going back to the nationwide death rates of Hispanics and Non-Hispanic Blacks are 218 per 100K and 285 per 100K respectively, compare that to D.C. where both
+#are nearly double at the aforementioned 458 per 100K for Hispanics and 568 per 100K for Non-Hispanic Blacks. The nationwide Non-Hispanic White
+#death rate is 242 per 100K and pretty close to Non-Hispanic Blacks, but this death rate is clearly not reflected within the D.C. area. 
 
+#For some other tiddlybits I have some above comments reflecting some of my strife in working with this data. 
 
 
