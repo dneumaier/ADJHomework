@@ -74,3 +74,56 @@ stateDR <- drAlDeaths %>% group_by(state) %>%
 
 #Last one because I thought of a morbidly funny lede, but not much else.
 #Did 2019 really suck that bad? According to data for drug related deaths from the CDC, it really did.
+
+drAlDeaths <- drAlDeaths %>% mutate(new_deaths = as.numeric(deaths))
+
+temp <- drAlDeaths %>% count(deaths)
+
+drAlDeaths %>% filter(is.na(new_deaths)) %>% summarize(count =  n())
+##14035/24480 about 57%
+drAlDeaths %>% filter(is.na(population)) %>% summarize(count =  n())
+## 2040/24480 about 8%
+
+#filtering out Non-drug and non-alcohol related deaths to get a count of those total deahts (O9 is it's code)
+drAlDeaths %>% filter(!is.na(new_deaths) & mcd_drug_alcohol_induced_cause_code != "O9") %>% 
+  summarize(total_da_deaths = sum(new_deaths))
+
+#now only looking at non-drug non-alcohol deaths
+drAlDeaths %>% filter(!is.na(new_deaths) & mcd_drug_alcohol_induced_cause_code == "O9") %>% 
+  summarize(total_da_deaths = sum(new_deaths))
+
+#non drug non alcohol deaths by year
+drAlDeaths %>% filter(!is.na(new_deaths) & mcd_drug_alcohol_induced_cause_code == "O9") %>% group_by(year) %>%
+  summarize(total_da_deaths = sum(new_deaths)) %>% arrange(desc(total_da_deaths))
+
+
+#drug alc deaths per year
+drAlDeaths %>% filter(!is.na(new_deaths) & mcd_drug_alcohol_induced_cause_code != "O9") %>% group_by(year) %>%
+  summarize(total_da_deaths = sum(new_deaths)) %>% arrange(desc(total_da_deaths))
+
+#comparing by state
+drAlDeaths %>% filter(!is.na(new_deaths) & mcd_drug_alcohol_induced_cause_code != "O9") %>% group_by(state) %>%
+  summarize(total_da_deaths = sum(new_deaths)) %>% arrange(desc(total_da_deaths))
+#Florida has the most: 169,859
+
+
+#removes duplicates for populations
+drAlDeaths %>% distinct(state, year, ten_year_age_groups, population)
+
+#removing dupes and comparing state and year
+state_pop <- drAlDeaths %>% filter(!is.na(population)) %>%
+  distinct(state, year, ten_year_age_groups, population) %>%
+  group_by(state,year) %>%
+  summarize(populaiton = sum(population))
+
+#Highest total deaths by state and year. mispelled population as populaiton earlier
+drAlDeaths %>% filter(!is.na(new_deaths) & mcd_drug_alcohol_induced_cause_code != "O9") %>%
+  group_by(state,year) %>%
+  summarize(total_deaths = sum(new_deaths)) %>%
+  arrange(desc(total_deaths)) %>%
+  #then join to our new state_pop file
+  inner_join(state_pop, by=c("state","year")) %>%
+  mutate(death_rate = total_deaths/populaiton*100000) %>%
+  arrange(desc(death_rate))
+
+
