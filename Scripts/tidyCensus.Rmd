@@ -1,0 +1,79 @@
+---
+title: "Introduction to tidycensus"
+output: html_notebook
+---
+
+```{r loading, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(tidycensus)
+
+# insert your census api key here
+census_api_key("")
+```
+
+Here's the documentation for [tidycensus](https://walker-data.com/tidycensus/articles/basic-usage.html#geography-in-tidycensus-1)
+
+Start with a very basic request: population by county
+```{r}
+county_pop <- get_acs(geography = "county", 
+              variables = "B01001_001", 
+              state = "MO", 
+              year = 2019)
+```
+
+Now by place (and you can rename the variable): 
+```{r}
+place_pop <- get_acs(geography = "place", 
+              variables = c(population="B01001_001"), 
+              state = "MO", 
+              year = 2019)
+```
+
+Search for variables:
+```{r}
+acs2019_var <- load_variables(2019, "acs5", cache=TRUE)
+
+variables %>% filter(grepl("income", label))
+```
+
+Also, you can use data.census.gov to locate the variables you're interested in.
+(Search for "plumbing")
+```{r}
+
+```
+
+
+Try for some more variables (plumbing facilities)
+```{r}
+
+```
+### CENSUS 2020 ###
+
+Only redistricting data is currently available from the 2020 Census.
+If you read the documentation on the tidycensus website, it says that the dataset name for the redistricting data is "pl".
+
+Load the variables file for the redistricting data: 
+```{r}
+
+```
+
+Get population by "place" in Missouri:
+```{r}
+
+```
+
+More granularly, get population by tract in Boone County:
+```{r}
+
+```
+
+Compare to 2010 Census
+First get the 2010 population numbers by tract in Boone County:
+```{r}
+
+```
+
+Then join the two datasets together:
+```{r}
+
+```
