@@ -217,12 +217,12 @@ pre code {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeSh0aWR5dmVyc2UpXG5saWJyYXJ5KHRpZHljZW5zdXMpXG5gYGAifQ== -->
-<pre class="r"><code>library(tidyverse)
-library(tidycensus)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2Vuc3VzX2FwaV9rZXkoY2tleSlcblxuYGBgIn0= -->
+<pre class="r"><code>census_api_key(ckey)
+</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gbGlicmFyeSh0aWR5Y2Vuc3VzKSA6IHRoZXJlIGlzIG5vIHBhY2thZ2UgY2FsbGVkIOKAmHRpZHljZW5zdXPigJlcbiJ9 -->
-<pre><code>Error in library(tidycensus) : there is no package called ‘tidycensus’</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiVG8gaW5zdGFsbCB5b3VyIEFQSSBrZXkgZm9yIHVzZSBpbiBmdXR1cmUgc2Vzc2lvbnMsIHJ1biB0aGlzIGZ1bmN0aW9uIHdpdGggYGluc3RhbGwgPSBUUlVFYC5cbiJ9 -->
+<pre><code>To install your API key for use in future sessions, run this function with `install = TRUE`.</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -230,26 +230,65 @@ library(tidycensus)</code></pre>
 <p>Start with a very basic request: population by county</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY291bnR5X3BvcCA8LSBnZXRfYWNzKGdlb2dyYXBoeSA9IFwiY291bnR5XCIsIFxuICAgICAgICAgICAgICB2YXJpYWJsZXMgPSBcIkIwMTAwMV8wMDFcIiwgXG4gICAgICAgICAgICAgIHN0YXRlID0gXCJNT1wiLCBcbiAgICAgICAgICAgICAgeWVhciA9IDIwMTkpXG5cbmBgYCJ9 -->
+<pre class="r"><code>county_pop &lt;- get_acs(geography = &quot;county&quot;, 
+              variables = &quot;B01001_001&quot;, 
+              state = &quot;MO&quot;, 
+              year = 2019)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiR2V0dGluZyBkYXRhIGZyb20gdGhlIDIwMTUtMjAxOSA1LXllYXIgQUNTXG5Vc2luZyBGSVBTIGNvZGUgJzI5JyBmb3Igc3RhdGUgJ01PJ1xuIn0= -->
+<pre><code>Getting data from the 2015-2019 5-year ACS
+Using FIPS code &#39;29&#39; for state &#39;MO&#39;</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Now by place (and you can rename the variable):</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGxhY2VfcG9wIDwtIGdldF9hY3MoZ2VvZ3JhcGh5ID0gXCJwbGFjZVwiLCBcbiAgICAgICAgICAgICAgdmFyaWFibGVzID0gYyhwb3B1bGF0aW9uPVwiQjAxMDAxXzAwMVwiKSwgXG4gICAgICAgICAgICAgIHN0YXRlID0gXCJNT1wiLCBcbiAgICAgICAgICAgICAgeWVhciA9IDIwMTkpXG5gYGAifQ== -->
+<pre class="r"><code>place_pop &lt;- get_acs(geography = &quot;place&quot;, 
+              variables = c(population=&quot;B01001_001&quot;), 
+              state = &quot;MO&quot;, 
+              year = 2019)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiR2V0dGluZyBkYXRhIGZyb20gdGhlIDIwMTUtMjAxOSA1LXllYXIgQUNTXG5Vc2luZyBGSVBTIGNvZGUgJzI5JyBmb3Igc3RhdGUgJ01PJ1xuIn0= -->
+<pre><code>Getting data from the 2015-2019 5-year ACS
+Using FIPS code &#39;29&#39; for state &#39;MO&#39;</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Search for variables:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWNzMjAxOV92YXIgPC0gbG9hZF92YXJpYWJsZXMoMjAxOSwgXCJhY3M1XCIsIGNhY2hlPVRSVUUpXG5cbmFjczIwMTlfdmFyICU+JSBmaWx0ZXIoZ3JlcGwoXCJpbmNvbWVcIiwgbGFiZWwpKVxuYGBgIn0= -->
+<pre class="r"><code>acs2019_var &lt;- load_variables(2019, &quot;acs5&quot;, cache=TRUE)
+
+acs2019_var %&gt;% filter(grepl(&quot;income&quot;, label))</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Also, you can use data.census.gov to locate the variables you’re interested in. (Search for “plumbing”)</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWNzMjAxOV92YXIgJT4lIGZpbHRlcihncmVwbChcIkIyNTA0OVwiLCBuYW1lKSlcbmBgYCJ9 -->
+<pre class="r"><code>acs2019_var %&gt;% filter(grepl(&quot;B25049&quot;, name))</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Try for some more variables (plumbing facilities)</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGx1bWJpbmcgPC0gZ2V0X2FjcyhnZW9ncmFwaHkgPSBcInBsYWNlXCIsICN3YW50IHRvIGtlZXAgaXQgYnkgY2l0aWVzXG4gICAgICAgICAgICAgIHZhcmlhYmxlcyA9IGMoXCJCMjUwNDlfMDAxXCIsXCJCMjUwNDlfMDAyXCIsXCJCMjUwNDlfMDAzXCIsXCJCMjUwNDlfMDA0XCIsXCJCMjUwNDlfMDA1XCIsXCJCMjUwNDlfMDA2XCIsXCJCMjUwNDlfMDA3XCIpLCAjYWxsIG9mIHRoZSBwbHVtYmluZyB2YXJpYWJsZXNcbiAgICAgICAgICAgICAgc3RhdGUgPSBcIk1PXCIsIFxuICAgICAgICAgICAgICB5ZWFyID0gMjAxOSlcbmBgYCJ9 -->
+<pre class="r"><code>plumbing &lt;- get_acs(geography = &quot;place&quot;, #want to keep it by cities
+              variables = c(&quot;B25049_001&quot;,&quot;B25049_002&quot;,&quot;B25049_003&quot;,&quot;B25049_004&quot;,&quot;B25049_005&quot;,&quot;B25049_006&quot;,&quot;B25049_007&quot;), #all of the plumbing variables
+              state = &quot;MO&quot;, 
+              year = 2019)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiR2V0dGluZyBkYXRhIGZyb20gdGhlIDIwMTUtMjAxOSA1LXllYXIgQUNTXG5Vc2luZyBGSVBTIGNvZGUgJzI5JyBmb3Igc3RhdGUgJ01PJ1xuIn0= -->
+<pre><code>Getting data from the 2015-2019 5-year ACS
+Using FIPS code &#39;29&#39; for state &#39;MO&#39;</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <div id="census-2020" class="section level3">
@@ -281,7 +320,7 @@ library(tidycensus)</code></pre>
 <!-- rnb-chunk-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiSW50cm9kdWN0aW9uIHRvIHRpZHljZW5zdXMiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KCmBgYHtyIGxvYWRpbmcsIG1lc3NhZ2U9RkFMU0UsIHdhcm5pbmc9RkFMU0V9CmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KHRpZHljZW5zdXMpCgojIGluc2VydCB5b3VyIGNlbnN1cyBhcGkga2V5IGhlcmUKY2Vuc3VzX2FwaV9rZXkoIiIpCmBgYAoKSGVyZSdzIHRoZSBkb2N1bWVudGF0aW9uIGZvciBbdGlkeWNlbnN1c10oaHR0cHM6Ly93YWxrZXItZGF0YS5jb20vdGlkeWNlbnN1cy9hcnRpY2xlcy9iYXNpYy11c2FnZS5odG1sI2dlb2dyYXBoeS1pbi10aWR5Y2Vuc3VzLTEpCgpTdGFydCB3aXRoIGEgdmVyeSBiYXNpYyByZXF1ZXN0OiBwb3B1bGF0aW9uIGJ5IGNvdW50eQpgYGB7cn0KY291bnR5X3BvcCA8LSBnZXRfYWNzKGdlb2dyYXBoeSA9ICJjb3VudHkiLCAKICAgICAgICAgICAgICB2YXJpYWJsZXMgPSAiQjAxMDAxXzAwMSIsIAogICAgICAgICAgICAgIHN0YXRlID0gIk1PIiwgCiAgICAgICAgICAgICAgeWVhciA9IDIwMTkpCmBgYAoKTm93IGJ5IHBsYWNlIChhbmQgeW91IGNhbiByZW5hbWUgdGhlIHZhcmlhYmxlKTogCmBgYHtyfQpwbGFjZV9wb3AgPC0gZ2V0X2FjcyhnZW9ncmFwaHkgPSAicGxhY2UiLCAKICAgICAgICAgICAgICB2YXJpYWJsZXMgPSBjKHBvcHVsYXRpb249IkIwMTAwMV8wMDEiKSwgCiAgICAgICAgICAgICAgc3RhdGUgPSAiTU8iLCAKICAgICAgICAgICAgICB5ZWFyID0gMjAxOSkKYGBgCgpTZWFyY2ggZm9yIHZhcmlhYmxlczoKYGBge3J9CmFjczIwMTlfdmFyIDwtIGxvYWRfdmFyaWFibGVzKDIwMTksICJhY3M1IiwgY2FjaGU9VFJVRSkKCnZhcmlhYmxlcyAlPiUgZmlsdGVyKGdyZXBsKCJpbmNvbWUiLCBsYWJlbCkpCmBgYAoKQWxzbywgeW91IGNhbiB1c2UgZGF0YS5jZW5zdXMuZ292IHRvIGxvY2F0ZSB0aGUgdmFyaWFibGVzIHlvdSdyZSBpbnRlcmVzdGVkIGluLgooU2VhcmNoIGZvciAicGx1bWJpbmciKQpgYGB7cn0KCmBgYAoKClRyeSBmb3Igc29tZSBtb3JlIHZhcmlhYmxlcyAocGx1bWJpbmcgZmFjaWxpdGllcykKYGBge3J9CgpgYGAKIyMjIENFTlNVUyAyMDIwICMjIwoKT25seSByZWRpc3RyaWN0aW5nIGRhdGEgaXMgY3VycmVudGx5IGF2YWlsYWJsZSBmcm9tIHRoZSAyMDIwIENlbnN1cy4KSWYgeW91IHJlYWQgdGhlIGRvY3VtZW50YXRpb24gb24gdGhlIHRpZHljZW5zdXMgd2Vic2l0ZSwgaXQgc2F5cyB0aGF0IHRoZSBkYXRhc2V0IG5hbWUgZm9yIHRoZSByZWRpc3RyaWN0aW5nIGRhdGEgaXMgInBsIi4KCkxvYWQgdGhlIHZhcmlhYmxlcyBmaWxlIGZvciB0aGUgcmVkaXN0cmljdGluZyBkYXRhOiAKYGBge3J9CgpgYGAKCkdldCBwb3B1bGF0aW9uIGJ5ICJwbGFjZSIgaW4gTWlzc291cmk6CmBgYHtyfQoKYGBgCgpNb3JlIGdyYW51bGFybHksIGdldCBwb3B1bGF0aW9uIGJ5IHRyYWN0IGluIEJvb25lIENvdW50eToKYGBge3J9CgpgYGAKCkNvbXBhcmUgdG8gMjAxMCBDZW5zdXMKRmlyc3QgZ2V0IHRoZSAyMDEwIHBvcHVsYXRpb24gbnVtYmVycyBieSB0cmFjdCBpbiBCb29uZSBDb3VudHk6CmBgYHtyfQoKYGBgCgpUaGVuIGpvaW4gdGhlIHR3byBkYXRhc2V0cyB0b2dldGhlcjoKYGBge3J9CgpgYGAK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiSW50cm9kdWN0aW9uIHRvIHRpZHljZW5zdXMiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KCmBgYHtyIGxvYWRpbmcsIG1lc3NhZ2U9RkFMU0UsIHdhcm5pbmc9RkFMU0V9CmxpYnJhcnkodGlkeXZlcnNlKQpsaWJyYXJ5KHRpZHljZW5zdXMpCgojIGluc2VydCB5b3VyIGNlbnN1cyBhcGkga2V5IGhlcmUgIyBUaGlzIHdvcmtzIGJ1dCBpdCBzZWVtcyB0byB0YWtlIGEgbGl0dGxlIGxvbmdlciBmb3IgaXQgdG8gd29yaywgc28ga2VlcCB0cnlpbmcgd2l0aCB0aGUgZm9sbG93aW5nIGNvbW1hbmRzIGlmIGl0IGdpdmVzIHlvdSBhbiBlcnJvciwgaXQgaXMgYSBicmljayB3YWxsIGJ1dCB2ZXJ5IGJyZWFrYWJsZQpja2V5IDwtIHJlYWRMaW5lcygifi9Eb2N1bWVudHMvR2l0SHViL0FESkhvbWV3b3JrL2NlbnN1c19rZXkudHh0IikKY2Vuc3VzX2FwaV9rZXkoY2tleSkKYGBgCgpIZXJlJ3MgdGhlIGRvY3VtZW50YXRpb24gZm9yIFt0aWR5Y2Vuc3VzXShodHRwczovL3dhbGtlci1kYXRhLmNvbS90aWR5Y2Vuc3VzL2FydGljbGVzL2Jhc2ljLXVzYWdlLmh0bWwjZ2VvZ3JhcGh5LWluLXRpZHljZW5zdXMtMSkKClN0YXJ0IHdpdGggYSB2ZXJ5IGJhc2ljIHJlcXVlc3Q6IHBvcHVsYXRpb24gYnkgY291bnR5CmBgYHtyfQpjb3VudHlfcG9wIDwtIGdldF9hY3MoZ2VvZ3JhcGh5ID0gImNvdW50eSIsICNkaWZmZXJlbnRpYXRlIGJ5IGNvdW50eQogICAgICAgICAgICAgIHZhcmlhYmxlcyA9ICJCMDEwMDFfMDAxIiwgI3BvcHVsYXRpb24gdmFyaWFibGUKICAgICAgICAgICAgICBzdGF0ZSA9ICJNTyIsICNzcGVjaWZ5IHN0YXRlCiAgICAgICAgICAgICAgeWVhciA9IDIwMTkpICNzcGVjaWZ5IG1vc3QgcmVjZW50IHllYXIKYGBgCgpOb3cgYnkgcGxhY2UgKGFuZCB5b3UgY2FuIHJlbmFtZSB0aGUgdmFyaWFibGUpOiAKYGBge3J9CnBsYWNlX3BvcCA8LSBnZXRfYWNzKGdlb2dyYXBoeSA9ICJwbGFjZSIsICNwbGFjZSBpcyBtb3JlIHNwZWNpZmljIHRoYW4gY291bnR5IGFzIHRoZXJlIGFyZSBtYW55IHBsYWNlcyBpbiBhIGNvdW50eQogICAgICAgICAgICAgIHZhcmlhYmxlcyA9IGMocG9wdWxhdGlvbj0iQjAxMDAxXzAwMSIpLCAjY2FsbGluZyB0aGUgcG9wIHZhbHVlIHRvIGJlIHBvcHVsYXRpb24gc28gd2UgZG9uJ3QgaGF2ZSBhIHN0cm9rZSB3aGlsZSB3ZSByZWFkCiAgICAgICAgICAgICAgc3RhdGUgPSAiTU8iLCAKICAgICAgICAgICAgICB5ZWFyID0gMjAxOSkKYGBgCgpTZWFyY2ggZm9yIHZhcmlhYmxlczoKYGBge3J9CmFjczIwMTlfdmFyIDwtIGxvYWRfdmFyaWFibGVzKDIwMTksICJhY3M1IiwgY2FjaGU9VFJVRSkKCmFjczIwMTlfdmFyICU+JSBmaWx0ZXIoZ3JlcGwoImluY29tZSIsIGxhYmVsKSkKYGBgCgpBbHNvLCB5b3UgY2FuIHVzZSBkYXRhLmNlbnN1cy5nb3YgdG8gbG9jYXRlIHRoZSB2YXJpYWJsZXMgeW91J3JlIGludGVyZXN0ZWQgaW4uCihTZWFyY2ggZm9yICJwbHVtYmluZyIpCmBgYHtyfQphY3MyMDE5X3ZhciAlPiUgZmlsdGVyKGdyZXBsKCJCMjUwNDkiLCBuYW1lKSkKYGBgCgoKVHJ5IGZvciBzb21lIG1vcmUgdmFyaWFibGVzIChwbHVtYmluZyBmYWNpbGl0aWVzKQpgYGB7cn0KcGx1bWJpbmcgPC0gZ2V0X2FjcyhnZW9ncmFwaHkgPSAicGxhY2UiLCAjd2FudCB0byBrZWVwIGl0IGJ5IGNpdGllcwogICAgICAgICAgICAgIHZhcmlhYmxlcyA9IGMoIkIyNTA0OV8wMDEiLCJCMjUwNDlfMDAyIiwiQjI1MDQ5XzAwMyIsIkIyNTA0OV8wMDQiLCJCMjUwNDlfMDA1IiwiQjI1MDQ5XzAwNiIsIkIyNTA0OV8wMDciKSwgI2FsbCBvZiB0aGUgcGx1bWJpbmcgdmFyaWFibGVzCiAgICAgICAgICAgICAgc3RhdGUgPSAiTU8iLCAKICAgICAgICAgICAgICB5ZWFyID0gMjAxOSkKYGBgCiMjIyBDRU5TVVMgMjAyMCAjIyMKCk9ubHkgcmVkaXN0cmljdGluZyBkYXRhIGlzIGN1cnJlbnRseSBhdmFpbGFibGUgZnJvbSB0aGUgMjAyMCBDZW5zdXMuCklmIHlvdSByZWFkIHRoZSBkb2N1bWVudGF0aW9uIG9uIHRoZSB0aWR5Y2Vuc3VzIHdlYnNpdGUsIGl0IHNheXMgdGhhdCB0aGUgZGF0YXNldCBuYW1lIGZvciB0aGUgcmVkaXN0cmljdGluZyBkYXRhIGlzICJwbCIuCgpMb2FkIHRoZSB2YXJpYWJsZXMgZmlsZSBmb3IgdGhlIHJlZGlzdHJpY3RpbmcgZGF0YTogCmBgYHtyfQoKYGBgCgpHZXQgcG9wdWxhdGlvbiBieSAicGxhY2UiIGluIE1pc3NvdXJpOgpgYGB7cn0KCmBgYAoKTW9yZSBncmFudWxhcmx5LCBnZXQgcG9wdWxhdGlvbiBieSB0cmFjdCBpbiBCb29uZSBDb3VudHk6CmBgYHtyfQoKYGBgCgpDb21wYXJlIHRvIDIwMTAgQ2Vuc3VzCkZpcnN0IGdldCB0aGUgMjAxMCBwb3B1bGF0aW9uIG51bWJlcnMgYnkgdHJhY3QgaW4gQm9vbmUgQ291bnR5OgpgYGB7cn0KCmBgYAoKVGhlbiBqb2luIHRoZSB0d28gZGF0YXNldHMgdG9nZXRoZXI6CmBgYHtyfQoKYGBgCg==</div>
 
 
 

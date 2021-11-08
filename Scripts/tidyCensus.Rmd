@@ -7,24 +7,25 @@ output: html_notebook
 library(tidyverse)
 library(tidycensus)
 
-# insert your census api key here
-census_api_key("")
+# insert your census api key here # This works but it seems to take a little longer for it to work, so keep trying with the following commands if it gives you an error, it is a brick wall but very breakable
+ckey <- readLines("~/Documents/GitHub/ADJHomework/census_key.txt")
+census_api_key(ckey)
 ```
 
 Here's the documentation for [tidycensus](https://walker-data.com/tidycensus/articles/basic-usage.html#geography-in-tidycensus-1)
 
 Start with a very basic request: population by county
 ```{r}
-county_pop <- get_acs(geography = "county", 
-              variables = "B01001_001", 
-              state = "MO", 
-              year = 2019)
+county_pop <- get_acs(geography = "county", #differentiate by county
+              variables = "B01001_001", #population variable
+              state = "MO", #specify state
+              year = 2019) #specify most recent year
 ```
 
 Now by place (and you can rename the variable): 
 ```{r}
-place_pop <- get_acs(geography = "place", 
-              variables = c(population="B01001_001"), 
+place_pop <- get_acs(geography = "place", #place is more specific than county as there are many places in a county
+              variables = c(population="B01001_001"), #calling the pop value to be population so we don't have a stroke while we read
               state = "MO", 
               year = 2019)
 ```
@@ -33,19 +34,22 @@ Search for variables:
 ```{r}
 acs2019_var <- load_variables(2019, "acs5", cache=TRUE)
 
-variables %>% filter(grepl("income", label))
+acs2019_var %>% filter(grepl("income", label))
 ```
 
 Also, you can use data.census.gov to locate the variables you're interested in.
 (Search for "plumbing")
 ```{r}
-
+acs2019_var %>% filter(grepl("B25049", name))
 ```
 
 
 Try for some more variables (plumbing facilities)
 ```{r}
-
+plumbing <- get_acs(geography = "place", #want to keep it by cities
+              variables = c("B25049_001","B25049_002","B25049_003","B25049_004","B25049_005","B25049_006","B25049_007"), #all of the plumbing variables
+              state = "MO", 
+              year = 2019)
 ```
 ### CENSUS 2020 ###
 
