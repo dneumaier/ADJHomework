@@ -1,0 +1,115 @@
+---
+title: "NYC Crashes"
+output:
+  html_document:
+    df_print: paged
+---
+```{r loading, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(janitor)
+library(RSocrata)
+```
+
+
+We'll be directly downloading some data from the NYC Open Data Portal
+Here's the page: [https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95)
+*each row is a single crash
+*borough column has blanks
+
+Here's how you can get the data too
+* Click API
+* Change the API Endpoint from JSON to CSV
+* Copy
+
+In order to make things a little easier on ourselves, we're going to narrow our request (the main file is quite large). If you read the API docs and try some things you can find ways to do this.
+
+
+
+```{r}
+data <- read.socrata("https://data.cityofnewyork.us/resource/h9gi-nx95.csv?borough=MANHATTAN")
+```
+Notes about the data:
+*292,126 rows of 1,835,059 available
+*29 columns
+*blanks in on street, off street, cross street columns
+Are there rows of no streets listed at all?
+```{r}
+data %>% filter(on_street_name == "" & off_street_name == "" & cross_street_name == "")
+```
+Notes:
+*23 rows of no streets listed
+
+Are any of the streets NA?
+```{r}
+data %>% filter(is.na(on_street_name) & is.na(off_street_name) & is.na(cross_street_name))
+```
+Notes:
+*No.
+
+What is the date range of our data?
+```{r}
+range(data$crash_date)
+```
+Notes:
+*July 1, 2012 to October 30, 2021
+
+What's the range of persons injured?
+```{r}
+#This doesn't work and I have absolutely no clue why
+range(!is.na(data$number_of_persons_injured))
+
+data %>% count(number_of_persons_injured) #checking number of
+```
+
+
+What's the total number of persons injured in our data? 
+```{r}
+data %>% filter(!is.na(number_of_persons_injured)) %>% summarize(sum(number_of_persons_injured))
+```
+*Didn't work the first time because there were NA's in the injuries (which makes sense because deaths are not included in the injuries part of it)
+
+What's the total number of persons killed in our data? 
+```{r}
+data %>% filter(!is.na(number_of_persons_killed)) %>% summarize(sum(number_of_persons_killed))
+```
+*269 deaths
+
+What percentage of those killed were pedestrians? 
+```{r}
+#Not including cyclists as those are listed separately, will include in next example
+data %>% filter(!is.na(number_of_persons_killed) & !is.na(number_of_pedestrians_killed)) %>% summarize(sum(number_of_pedestrians_killed)/sum(number_of_persons_killed))
+
+#Now including cyclists
+data %>% filter(!is.na(number_of_persons_killed) & !is.na(number_of_pedestrians_killed) & !is.na(number_of_cyclist_killed)) %>% summarize(sum(sum(number_of_pedestrians_killed), sum(number_of_cyclist_killed))/sum(number_of_persons_killed))
+```
+*72% of those killed in NYC crashes are pedestrians (not including cyclists)
+*84% of those killed in NYC crashes are pedestrians and cyclists
+
+Which year had the most crashes? The most crashes that involved a fatality?
+```{r}
+#data <- data %>% mutate(years, )
+```
+
+
+Plot the total number of fatal crashes per year:
+```{r}
+
+```
+
+
+Which day in 2021 had the most accidents? 
+```{r}
+
+```
+
+
+Make a map of the accidents on that day: 
+```{r}
+
+```
+
+
+Which contributing factor was the most common? 
+```{r}
+
+```

@@ -157,3 +157,18 @@ contrib %>% inner_join(comms, by=c("cmte_id")) %>%
 
 #I recognize I have more code than those my peers may have had in my group, but I just noticed some things much later than I should have. 
 
+#woopsie doodle this is better for where does Hartzler Rank in PAC giving first for Senate Candidates
+contrib %>% inner_join(cands, by=c("other_id" = "pcc")) %>%
+  filter(transaction_tp == "24K") %>%
+  group_by(cand_name, office, other_id) %>%
+  summarize(total = sum(transaction_amt)) %>%
+  arrange(desc(total))
+
+
+#better for individual contribs
+contrib %>% inner_join(cands, by=c("cmte_id" = "pcc")) %>%
+  filter(transaction_tp %in% c("15", "15E", "22Y")) %>%
+  group_by(cand_name, office, cmte_id) %>%
+  summarize(total = sum(transaction_amt)) %>%
+  arrange(desc(total))
+
