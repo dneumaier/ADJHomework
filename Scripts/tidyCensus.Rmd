@@ -51,33 +51,101 @@ plumbing <- get_acs(geography = "place", #want to keep it by cities
               state = "MO", 
               year = 2019)
 ```
+Moving on from here is new stuff to me:
 ### CENSUS 2020 ###
 
 Only redistricting data is currently available from the 2020 Census.
 If you read the documentation on the tidycensus website, it says that the dataset name for the redistricting data is "pl".
 
-Load the variables file for the redistricting data: 
-```{r}
+Using the documentation page linked above, start building a query to pull information from the redistricting files for the 2020 Census (they are currently the only files available).
+Before you can run this, you need to choose variables. 
+Load the variables using the documentation as a guide: 
 
+```{r}
+census_pop <- get_decennial(
+  geography = "place",
+  variables = "P1_001N",
+  state = "MO",
+  year = 2020
+)
+
+cen20_var <- load_variables(2020, "pl", cache=TRUE)
 ```
 
-Get population by "place" in Missouri:
++Compare to 2010 Census
+First get the 2010 population numbers by place in Missouri:
+If you try copying the script above, changing 2020 to 2010 and running it, you'll get a mysterious error. It doesn't give you any helpful information, so you have to troubleshoot it yourself. 
+The issue is with the variable name. They change. So pull the variables for the 2010 redistricting file first.
 ```{r}
 
+cen10_var <- load_variables(1020, "pl", cache=TRUE)
+
+census_pop10 <- get_decennial(
+  geography = "place",
+  variables = "P001001",
+  state = "MO",
+  year = 2010
+)
 ```
 
-More granularly, get population by tract in Boone County:
++Then join the two datasets together, rename the important variables, calculate a percent change, and reorder the rows so that the "place" with the biggest percent change appears on top:
 ```{r}
 
+census_pop %>% inner_join(census_pop10, by="GEOID") %>%
+  select(NAME.x, value.x, value.y) %>%
+  rename("pop2020"=value.x, "pop2010"=value.y) %>%
+  mutate(pct_chg = (pop2020-pop2010)/pop2010) %>%
+  arrange(desc(pct_chg))
 ```
 
-Compare to 2010 Census
-First get the 2010 population numbers by tract in Boone County:
++The percent change is meaningless for super small cities; the top city shows an increase of 5 people, from 0 to 5.
+Limit the scope of your query to cities that are larger than 65,000 people.
 ```{r}
 
+census_pop %>% inner_join(census_pop10, by="GEOID") %>%
+  select(NAME.x, value.x, value.y) %>%
+  rename("pop2020"=value.x, "pop2010"=value.y) %>%
+  filter(pop2020 > 65000) %>%
+  mutate(pct_chg = (pop2020-pop2010)/pop2010) %>%
+  arrange(desc(pct_chg))
 ```
 
-Then join the two datasets together:
++You can get a lot smaller than county or place with both the Decennial census data and the ACS.
+The ACS (5 yr) goes down to the block group, but the Decennial census goes down to the block, which is pretty much what it sounds like: a city block (see definitions below). 
+
+If you read the geography portion of the documentation, you'll see that getting track, block group, or block information requires specifying a state in your request. (What that means: if you wanted data on every census tract in the US, you'd have to request each state, the District, and the territories separately. You could use a "for" loop.)
+
+Blocks are almost too small to meaningfully map, even for a city like Columbia. Tracts are more common. Pull the population by tract for all the tracts in Boone County:
 ```{r}
-
+census_tract_pop <- get_decennial(
+  geography = "tract",
+  variables = "P1_001N",
+  state = "MO",
+  county = "BOONE",
+  year = 2020
+)
 ```
+
+### More about geographies: 
+
+[Place](https://www.census.gov/programs-surveys/geography/about/glossary.html#par_textimage_14)
+[Tract](https://www.census.gov/programs-surveys/geography/about/glossary.html#par_textimage_13)
+  * subdivisions of a county
+  * generally have a population size between 1,200 and 8,000 people
+  * an optimum size of 4,000 people
+  * usually covers a contiguous area
+[Block Group](https://www.census.gov/programs-surveys/geography/about/glossary.html#par_textimage_4)
+  * subdivisions of a tract
+  * generally contain between 600 and 3,000 people
+  * consists of clusters of blocks within the same census tract
+  * usually covers a contiguous area
+[Block](https://www.census.gov/programs-surveys/geography/about/glossary.html#par_textimage_5)
+  * subdivisions of a block group
+  * statistical areas bounded by visible features, such as streets, roads, streams, and railroad tracks, and by nonvisible boundaries, such as selected property lines and city, township, school district, and county limits
+  * generally small in area; for example, a block in a city bounded on all sides by streets. Census blocks in suburban and rural areas may be large and irregular
+
+### More about Census definitions:
+  * Housing unit: A housing unit is a house, an apartment, a mobile home, a group of rooms, or a single room that is occupied (or if vacant, is intended for occupancy) as separate living quarters. Separate living quarters are those in which the occupants live and eat separately from any other persons in the building and which have direct access from the outside of the building or through a common hall.
+  * Group Quarters: Group quarters are defined as places where people live or stay in a group living arrangement that is owned or managed by an organization providing housing and/or services for the residents.
+  * Household: A household includes all the persons who occupy a housing unit as their usual place of residence.
+  * Family: A family is a group of two people or more (one of whom is the householder) related by birth, marriage, or adoption and residing together
