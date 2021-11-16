@@ -62,7 +62,7 @@ Before you can run this, you need to choose variables.
 Load the variables using the documentation as a guide: 
 
 ```{r}
-census_pop <- get_decennial(
+census_pop <- get_decennial( #
   geography = "place",
   variables = "P1_001N",
   state = "MO",
