@@ -1,0 +1,103 @@
+---
+title: "basic web scraping"
+output: html_notebook
+---
+
+### OVERVIEW
+
+Web scraping is literally "scraping" information off of a webpage and into a program (we're using R obviously) so that you can reformat it into something that is analyzable.   
+Web scraping can be pretty easy or very complicated, and it all depends on how the webpage was built that you are trying to scrape. As in introduction to scraping we'll be doing a very easy scrape, one that only pulls information from the HTML on a webpage. 
+(This assumes you have some basic knowledge of HTML and the various "tags" that it uses).   
+I recommend that you use **Firefox** or **Chrome** for this, as they both have a tool called "Inspect" that is useful for viewing HTML on any webpage.
+
+First, load the necessary libraries: tidyverse. 
+Inside tidyverse is a package known as "rvest". You can read the documentation here: [rvest.tidyverse.org](https://rvest.tidyverse.org/)  
+
+```{r}
+library(tidyverse)
+library(janitor)
+```
+
+For this exercise, we're going to scrape the police dispatch records from the Columbia website: 
+[https://www.como.gov/CMS/911dispatch/police.php](https://www.como.gov/CMS/911dispatch/police.php)  
+Note that this website has an "Export CSV" option. If you just want a snapshot of this data, use the search options and download the CSV! That's much easier.   
+Web scraping should be used to reduce human labor. So if you're planning to grab data from this website every day for a month, then a scraper makes more sense.  
+
+### URL of the website to be scraped:   
+```{r}
+url <- "https://www.como.gov/CMS/911dispatch/police.php"
+```
+
+### Steps to get and parse the html  
+rvest does all the hard work here.  
+The read_html() function reads the webpage and returns the html. It gets stored in R as a series of embedded lists.  
+The html_element() function finds a particular element, or "tag" inside the html. Our table is coded into the page using a <table> tag (which you'll see if you right-click on the table from the browser and choose "Inspect" - this will show you the HTML for that section).  
+The html_table() function takes the HMTL inside of the <table> tag and turns it into a tibble (a tidyverse data frame)... aka something we can analyze!
+
+Note: for this particular webpage, the returned results contain two rows of metadata that we don't want: a summary of how many records were returned, and a list of pages (if the main page is paginated) at the bottom. We remove both of those with the filter.
+
+```{r}
+html <- read_html(url)
+
+data <- html %>% html_element("table") %>%
+  html_table() %>%
+  clean_names() %>%
+  filter(!grepl("records",date_time) & !grepl("\\|", date_time))
+```
+
+That was pretty easy. Now we'll get fancier: use the search box at the top of the page to get results for two days: 11/25/2021 to 11/26/2021 (Thanksgiving & Black Friday). Hit Submit. Now we get 329 (or so) records. And notice what happened to the URL: it reflects the parameters that we entered into the search box. Let's break it down:  
+  
+* https://www.como.gov/CMS/911dispatch/police.php
+* ?
+* type=
+* &keyword=
+* &Start_Date=11%2F25%2F2021
+* &End_Date=11%2F26%2F2021
+* &Submit=Filter
+
+First is the base of our original URL. That is followed by a question mark, which indicates that parameters are about to be passed.  
+The first parameter is "type", which you can see in the search options box. We didn't use it, so that parameter is blank.  
+Same for "keyword" (which links to the "Street Name or Address" box.)  
+But we have a Start_Date and an End_Date. URLs can't have certain characters (like slashes) as part of the parameters, so they are encoded. The slash in the data here is represented as "%2F". See a table of those alternate characters here: [URL Encoding Reference](https://www.w3schools.com/tags/ref_urlencode.ASP)  
+The final parameter is to Submit the Filter options. 
+
+This is good to know. That means we can mess with the filters without ever having to visit the webpage. 
+
+Scrape the incidents for these two days:
+```{r}
+url2 <- "https://www.como.gov/CMS/911dispatch/police.php?type=&keyword=&Start_Date=11%2F25%2F2021&End_Date=11%2F26%2F2021&Submit=Filter"
+
+html2 <- read_html(url2)
+
+data2 <- html2 %>% html_element("table") %>%
+  html_table() %>%
+  clean_names() %>%
+  filter(!grepl("records",date_time) & !grepl("\\|", date_time))
+```
+
+Notice anything about the results you get back? 
+
+There should be 300+ records, but instead we only have 100. If you go back to the actual webpage to find out why, you'll see that it paginates the results. It shows the first 100, but then you have to click on the following pages to see the rest. The scraper only scraped what was on the first page. 
+
+Click on the "2" to go to the second page and look at the URL: it wiped away our filter options, but added another parameter: "offset=100".  Now we *could* scrape each individual page (four of them) and combine the results, or we could write a **LOOP** to loop through each page automatically. 
+
+Create a loop to deal with the offsets
+```{r}
+# this is a vector of the different offset values we need to use to scrape these four pages
+y <- c("0", "100", "200", "300")
+
+# this is a container for our final data. It has to exist OUTSIDE of the for loop... what happens in a loop stays in a loop unless you pass it outside of the loop. This is a fundamental rule in programming. 
+full_data <- NULL
+
+# the (x in y) part of this loop means: For each value (x) in the vector y (which we created above). So for each iteration of the loop, x = one of the offset values, starting with "0". 
+for (x in y) {
+  # use the paste0() function here to string items together. Here, were pasting the various offset values (represented as "x") to the base URL:
+  url <- paste0("https://www.como.gov/CMS/911dispatch/police.php?type=&keyword=&Start_Date=11%2F25%2F2021&End_Date=11%2F26%2F2021&Submit=Filter&offset=",x)
+  html <- read_html(url)
+  data <- html %>% html_element("table") %>% html_table() %>% clean_names() %>%
+  filter(!grepl("records",date_time) & !grepl("\\|", date_time))
+  # here we pass the information from each iteration into the full_data variable, which exists OUTSIDE the loop.
+  full_data <- rbind(full_data, data)
+}
+```
+
